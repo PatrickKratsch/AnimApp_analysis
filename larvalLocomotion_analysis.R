@@ -21,7 +21,7 @@ library("rowr")
 # Pad non-analysed frames with NA, but before using cbind.call(), bind all
 # data frames together using cbind() in order to see via the warnings()
 # created how many frames couldn't be analysed - want to be below 100.
-setwd("../videos/111.1.1/cropped/")
+setwd("../../videos/111.1.1/cropped/")
 file_names <- list.files(pattern = ".csv")
 data_11111 <- do.call(cbind.fill, c(lapply(file_names, fread), fill = NA))
 setDT(data_11111)
@@ -230,7 +230,7 @@ total_displacement_13713 <- sapply(movement_13713, sum, na.rm = TRUE)
 
 
 ###############################################################################
-###############################@## 72.1.1/+ ###################################
+################################## 72.1.1/+ ###################################
 ###############################################################################
 
 # Load .csv output from AnimApp
@@ -551,6 +551,7 @@ p_single
 ###############################################################################
 
 # Expand data.tables to include larval length, width, and stops
+# Also add axial ratio to get the mean AR
 norm_11111_combined[, larval_length := max(V6, V7) / 3.6, by = row.names(norm_11111_combined)]
 norm_13211_combined[, larval_length := max(V6, V7) / 3.6, by = row.names(norm_13211_combined)]
 norm_711_combined[, larval_length := max(V6, V7) / 3.6, by = row.names(norm_711_combined)]
@@ -572,342 +573,328 @@ norm_2511_combined[, larval_stop := larval_width/larval_length, by = row.names(n
 norm_13713_combined[, larval_stop := larval_width/larval_length, by = row.names(norm_13713_combined)]
 norm_7211_combined[, larval_stop := larval_width/larval_length, by = row.names(norm_7211_combined)]
 
+norm_11111_combined[, AR := larval_length/larval_width, by = row.names(norm_11111_combined)]
+norm_13211_combined[, AR := larval_length/larval_width, by = row.names(norm_13211_combined)]
+norm_711_combined[, AR := larval_length/larval_width, by = row.names(norm_711_combined)]
+norm_2511_combined[, AR := larval_length/larval_width, by = row.names(norm_2511_combined)]
+norm_13713_combined[, AR := larval_length/larval_width, by = row.names(norm_13713_combined)]
+norm_7211_combined[, AR := larval_length/larval_width, by = row.names(norm_7211_combined)]
+
+# Get time in seconds (15 fps recordings)
 norm_11111_combined[, time := frame / 15]
 norm_13211_combined[, time := frame / 15]
 norm_711_combined[, time := frame / 15]
 norm_2511_combined[, time := frame / 15]
 norm_13713_combined[, time := frame / 15]
 norm_7211_combined[, time := frame / 15]
+###############################################################################
+########################### Analyse larval anatomy ############################
+###############################################################################
 
-## Analyse larval anatomy
-# Length
-max_lengths_111 <- norm_11111_combined[, max(larval_length), by = sample_name]
-max_lengths_132 <- norm_13211_combined[, max(larval_length), by = sample_name]
-max_lengths_7 <- norm_711_combined[, max(larval_length), by = sample_name]
-max_lengths_25 <- norm_2511_combined[, max(larval_length), by = sample_name]
-max_lengths_137 <- norm_13713_combined[, max(larval_length), by = sample_name]
-max_lengths_72 <- norm_7211_combined[, max(larval_length), by = sample_name]
+###############################################################################
+################################## Length #####################################
+###############################################################################
 
-colnames(max_lengths_111)[2] <- "max_length"
-colnames(max_lengths_132)[2] <- "max_length"
-colnames(max_lengths_7)[2] <- "max_length"
-colnames(max_lengths_25)[2] <- "max_length"
-colnames(max_lengths_137)[2] <- "max_length"
-colnames(max_lengths_72)[2] <- "max_length"
+# Check whether length is normally distributed
+ggplot(norm_11111_combined, aes(x = larval_length, fill = sample_name)) +
+  geom_histogram()
 
-min_lengths_111 <- norm_11111_combined[, min(larval_length), by = sample_name]
-min_lengths_132 <- norm_13211_combined[, min(larval_length), by = sample_name]
-min_lengths_7 <- norm_711_combined[, min(larval_length), by = sample_name]
-min_lengths_25 <- norm_2511_combined[, min(larval_length), by = sample_name]
-min_lengths_137 <- norm_13713_combined[, min(larval_length), by = sample_name]
-min_lengths_72 <- norm_7211_combined[, min(larval_length), by = sample_name]
+ggplot(norm_13211_combined, aes(x = larval_length, fill = sample_name)) +
+  geom_histogram()
 
-colnames(min_lengths_111)[2] <- "min_length"
-colnames(min_lengths_132)[2] <- "min_length"
-colnames(min_lengths_7)[2] <- "min_length"
-colnames(min_lengths_25)[2] <- "min_length"
-colnames(min_lengths_137)[2] <- "min_length"
-colnames(min_lengths_72)[2] <- "min_length"
+ggplot(norm_711_combined, aes(x = larval_length, fill = sample_name)) +
+  geom_histogram()
 
-mean_lengths_111 <- norm_11111_combined[, mean(larval_length), by = sample_name]
-mean_lengths_132 <- norm_13211_combined[, mean(larval_length), by = sample_name]
-mean_lengths_7 <- norm_711_combined[, mean(larval_length), by = sample_name]
-mean_lengths_25 <- norm_2511_combined[, mean(larval_length), by = sample_name]
-mean_lengths_137 <- norm_13713_combined[, mean(larval_length), by = sample_name]
-mean_lengths_72 <- norm_7211_combined[, mean(larval_length), by = sample_name]
+ggplot(norm_2511_combined, aes(x = larval_length, fill = sample_name)) +
+  geom_histogram()
 
-colnames(mean_lengths_111)[2] <- "mean_length"
-colnames(mean_lengths_132)[2] <- "mean_length"
-colnames(mean_lengths_7)[2] <- "mean_length"
-colnames(mean_lengths_25)[2] <- "mean_length"
-colnames(mean_lengths_137)[2] <- "mean_length"
-colnames(mean_lengths_72)[2] <- "mean_length"
+ggplot(norm_13713_combined, aes(x = larval_length, fill = sample_name)) +
+  geom_histogram()
 
-max_lengths <- rbind(max_lengths_111, max_lengths_132, max_lengths_7,
-                     max_lengths_25, max_lengths_137, max_lengths_72)
+ggplot(norm_7211_combined, aes(x = larval_length, fill = sample_name)) +
+  geom_histogram()
 
-min_lengths <- rbind(min_lengths_111, min_lengths_132, min_lengths_7,
-                     min_lengths_25, min_lengths_137, min_lengths_72)
 
-mean_lengths <- rbind(mean_lengths_111, mean_lengths_132, mean_lengths_7,
-                     mean_lengths_25, mean_lengths_137, mean_lengths_72)
+median_lengths_111 <- norm_11111_combined[, median(larval_length), by = sample_name]
+median_lengths_132 <- norm_13211_combined[, median(larval_length), by = sample_name]
+median_lengths_7 <- norm_711_combined[, median(larval_length), by = sample_name]
+median_lengths_25 <- norm_2511_combined[, median(larval_length), by = sample_name]
+median_lengths_137 <- norm_13713_combined[, median(larval_length), by = sample_name]
+median_lengths_72 <- norm_7211_combined[, median(larval_length), by = sample_name]
 
-max_lengths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
-max_lengths$genotype <- factor(max_lengths$genotype, levels = c("norm_132", "norm_111", "norm_7",
-                                                          "norm_25", "norm_137", "norm_72"))
+colnames(median_lengths_111)[2] <- "median_length"
+colnames(median_lengths_132)[2] <- "median_length"
+colnames(median_lengths_7)[2] <- "median_length"
+colnames(median_lengths_25)[2] <- "median_length"
+colnames(median_lengths_137)[2] <- "median_length"
+colnames(median_lengths_72)[2] <- "median_length"
 
-min_lengths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
-min_lengths$genotype <- factor(min_lengths$genotype, levels = c("norm_132", "norm_111", "norm_7",
-                                                          "norm_25", "norm_137", "norm_72"))
+median_lengths <- rbind(median_lengths_111, median_lengths_132, median_lengths_7,
+                     median_lengths_25, median_lengths_137, median_lengths_72)
 
-mean_lengths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
-mean_lengths$genotype <- factor(mean_lengths$genotype, levels = c("norm_132", "norm_111", "norm_7",
+median_lengths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
+median_lengths$genotype <- factor(median_lengths$genotype, levels = c("norm_132", "norm_111", "norm_7",
                                                                 "norm_25", "norm_137", "norm_72"))
 
-max_lengths$Genotype <- factor(ifelse(max_lengths$genotype == "norm_132", "loxP",
-                                   ifelse(max_lengths$genotype == "norm_111", "loxP",
-                                          ifelse(max_lengths$genotype == "norm_7", "loxP",
-                                                 ifelse(max_lengths$genotype == "norm_25", "GEPD",
-                                                        ifelse(max_lengths$genotype == "norm_137", "GEPD",
-                                                               "GEPD"))))), levels = c("loxP", "GEPD"))
-min_lengths$Genotype <- factor(ifelse(min_lengths$genotype == "norm_132", "loxP",
-                                   ifelse(min_lengths$genotype == "norm_111", "loxP",
-                                          ifelse(min_lengths$genotype == "norm_7", "loxP",
-                                                 ifelse(min_lengths$genotype == "norm_25", "GEPD",
-                                                        ifelse(min_lengths$genotype == "norm_137", "GEPD",
-                                                               "GEPD"))))), levels = c("loxP", "GEPD"))
-mean_lengths$Genotype <- factor(ifelse(mean_lengths$genotype == "norm_132", "loxP",
-                                      ifelse(mean_lengths$genotype == "norm_111", "loxP",
-                                             ifelse(mean_lengths$genotype == "norm_7", "loxP",
-                                                    ifelse(mean_lengths$genotype == "norm_25", "GEPD",
-                                                           ifelse(mean_lengths$genotype == "norm_137", "GEPD",
+median_lengths$Genotype <- factor(ifelse(median_lengths$genotype == "norm_132", "loxP",
+                                      ifelse(median_lengths$genotype == "norm_111", "loxP",
+                                             ifelse(median_lengths$genotype == "norm_7", "loxP",
+                                                    ifelse(median_lengths$genotype == "norm_25", "GEPD",
+                                                           ifelse(median_lengths$genotype == "norm_137", "GEPD",
                                                                   "GEPD"))))), levels = c("loxP", "GEPD"))
 
-
-gg_max_lengths <- ggplot(max_lengths, aes(x = genotype, y = max_length)) + 
+# Get median lengths of pooled data
+gg_median_lengths_pooled <- ggplot(median_lengths, aes(x = Genotype, y = median_length)) + 
   geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
   geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
   scale_shape_discrete(solid = FALSE) +
   scale_x_discrete(name = NULL) +
-  scale_y_continuous(name = "Max. Length / mm") +
+  scale_y_continuous(name = "Median Length / mm", limits = c(0, 6)) +
   scale_fill_manual(values = c("grey64", "firebrick")) +
   theme_bw() +
-  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
+  theme(axis.title.y = element_text(size = 40, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
         text = element_text(size = 50), 
-        legend.text = element_text(size = 30),
-        legend.justification = c(1, 1), legend.position = c(1, 1),
-        legend.box.margin = margin(c(10, 10, 10, 10)),
-        legend.title = element_blank(),
-        legend.key.size = unit(2.0, 'cm'))
-gg_max_lengths
-
-gg_min_lengths <- ggplot(min_lengths, aes(x = genotype, y = min_length)) + 
-  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
-  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
-  scale_shape_discrete(solid = FALSE) +
-  scale_x_discrete(name = NULL) +
-  scale_y_continuous(name = "Max. Length / mm") +
-  scale_fill_manual(values = c("grey64", "firebrick")) +
-  theme_bw() +
-  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
-        text = element_text(size = 50), 
-        legend.text = element_text(size = 30),
-        legend.justification = c(1, 1), legend.position = c(1, 1),
-        legend.box.margin = margin(c(10, 10, 10, 10)),
-        legend.title = element_blank(),
-        legend.key.size = unit(2.0, 'cm'))
-gg_min_lengths
-
-gg_mean_lengths <- ggplot(mean_lengths, aes(x = genotype, y = mean_length)) + 
-  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
-  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
-  scale_shape_discrete(solid = FALSE) +
-  scale_x_discrete(name = NULL) +
-  scale_y_continuous(name = "Mean Length / mm", limits = c(3, 6)) +
-  scale_fill_manual(values = c("grey64", "firebrick")) +
-  theme_bw() +
-  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
-        text = element_text(size = 50), 
-        legend.text = element_text(size = 30),
-        legend.justification = c(1, 1), legend.position = c(1, 1),
-        legend.box.margin = margin(c(10, 10, 10, 10)),
-        legend.title = element_blank(),
-        legend.key.size = unit(2.0, 'cm'))
-gg_mean_lengths
+        legend.position = "none")
+gg_median_lengths_pooled
 
 # Stats
-kruskal.test(mean_lengths$mean_length ~ mean_lengths$genotype, data = mean_lengths)
-dunnTest(mean_lengths$mean_length ~ mean_lengths$genotype, data = mean_lengths)
+wilcox.test(median_length ~ Genotype, data = median_lengths)
 
-max_lengths <- mean_lengths[, max(mean_length, na.rm = TRUE), by = Genotype]
-max_loxp <- max_lengths[1,2]
-max_loxp <- as.numeric(max_loxp)
-max_loxp <- max_loxp + 0.2
+# Error bars
+max_length <- max(median_lengths$median_length) + 0.25
+sign_max_length <- data.frame(Genotype = c(1, 2), median_length = rep(max_length, 2))
+gg_median_lengths_pooled2 <- gg_median_lengths_pooled + geom_line(data = sign_max_length, aes(x = Genotype, y = median_length, group = 1)) +
+  annotate("text", x = 1.5, y = max_length + 0.25, label = "****", size = 10)
 
-max_gepd <- max_lengths[2,2]
-max_gepd <- as.numeric(max_gepd)
-max_gepd <- max_gepd + 0.2
+gg_median_lengths_pooled2
 
-# Draw error bars for gg_mean_lengths
-sign_loxp <- data.frame(genotype = c("norm_111", "norm_132", "norm_7"), mean_length = rep(max_loxp, 3))
-sign_gepd <- data.frame(genotype = c("norm_25", "norm_137", "norm_72"), mean_length = rep(max_gepd, 3))
-
-gg_mean_lengths2 <- gg_mean_lengths + geom_line(data = sign_loxp, aes(x = genotype, y = mean_length, group = 1))
-
-gg_mean_lengths3 <- gg_mean_lengths2 + geom_line(data = sign_gepd, aes(x = genotype, y = mean_length, group = 1))
-
-# Draw error bar for betwen-group stats
-sign_combined <- data.frame(genotype = c("norm_111", "norm_137"), mean_length = rep(max_gepd + 0.3, 2))
-gg_mean_lengths4 <- gg_mean_lengths3 + geom_line(data = sign_combined, aes(x = genotype, y = mean_length, group = 1)) +
-  annotate("text", x = 3.5, y = max_gepd + 0.4, label = "*   ****", size = 10) +
-  annotate("text", x = 2, y = max_loxp + 0.1, label = "ns", size = 10) +
-  annotate("text", x = 5, y = max_gepd + 0.1, label = "**", size = 10)
-gg_mean_lengths4
-
-
+###############################################################################
 # Analyse width
-max_widths_111 <- norm_11111_combined[, max(larval_width), by = sample_name]
-max_widths_132 <- norm_13211_combined[, max(larval_width), by = sample_name]
-max_widths_7 <- norm_711_combined[, max(larval_width), by = sample_name]
-max_widths_25 <- norm_2511_combined[, max(larval_width), by = sample_name]
-max_widths_137 <- norm_13713_combined[, max(larval_width), by = sample_name]
-max_widths_72 <- norm_7211_combined[, max(larval_width), by = sample_name]
+###############################################################################
 
-colnames(max_widths_111)[2] <- "max_width"
-colnames(max_widths_132)[2] <- "max_width"
-colnames(max_widths_7)[2] <- "max_width"
-colnames(max_widths_25)[2] <- "max_width"
-colnames(max_widths_137)[2] <- "max_width"
-colnames(max_widths_72)[2] <- "max_width"
+# Check whether width is normally distributed
+ggplot(norm_11111_combined, aes(x = larval_width, fill = sample_name)) +
+  geom_histogram()
 
-min_widths_111 <- norm_11111_combined[, min(larval_width), by = sample_name]
-min_widths_132 <- norm_13211_combined[, min(larval_width), by = sample_name]
-min_widths_7 <- norm_711_combined[, min(larval_width), by = sample_name]
-min_widths_25 <- norm_2511_combined[, min(larval_width), by = sample_name]
-min_widths_137 <- norm_13713_combined[, min(larval_width), by = sample_name]
-min_widths_72 <- norm_7211_combined[, min(larval_width), by = sample_name]
+ggplot(norm_13211_combined, aes(x = larval_width, fill = sample_name)) +
+  geom_histogram()
 
-colnames(min_widths_111)[2] <- "min_width"
-colnames(min_widths_132)[2] <- "min_width"
-colnames(min_widths_7)[2] <- "min_width"
-colnames(min_widths_25)[2] <- "min_width"
-colnames(min_widths_137)[2] <- "min_width"
-colnames(min_widths_72)[2] <- "min_width"
+ggplot(norm_711_combined, aes(x = larval_width, fill = sample_name)) +
+  geom_histogram()
 
-mean_widths_111 <- norm_11111_combined[, mean(larval_width), by = sample_name]
-mean_widths_132 <- norm_13211_combined[, mean(larval_width), by = sample_name]
-mean_widths_7 <- norm_711_combined[, mean(larval_width), by = sample_name]
-mean_widths_25 <- norm_2511_combined[, mean(larval_width), by = sample_name]
-mean_widths_137 <- norm_13713_combined[, mean(larval_width), by = sample_name]
-mean_widths_72 <- norm_7211_combined[, mean(larval_width), by = sample_name]
+ggplot(norm_2511_combined, aes(x = larval_width, fill = sample_name)) +
+  geom_histogram()
 
-colnames(mean_widths_111)[2] <- "mean_width"
-colnames(mean_widths_132)[2] <- "mean_width"
-colnames(mean_widths_7)[2] <- "mean_width"
-colnames(mean_widths_25)[2] <- "mean_width"
-colnames(mean_widths_137)[2] <- "mean_width"
-colnames(mean_widths_72)[2] <- "mean_width"
+ggplot(norm_13713_combined, aes(x = larval_width, fill = sample_name)) +
+  geom_histogram()
 
-max_widths <- rbind(max_widths_111, max_widths_132, max_widths_7,
-                     max_widths_25, max_widths_137, max_widths_72)
+ggplot(norm_7211_combined, aes(x = larval_width, fill = sample_name)) +
+  geom_histogram()
 
-min_widths <- rbind(min_widths_111, min_widths_132, min_widths_7,
-                     min_widths_25, min_widths_137, min_widths_72)
 
-mean_widths <- rbind(mean_widths_111, mean_widths_132, mean_widths_7,
-                      mean_widths_25, mean_widths_137, mean_widths_72)
+median_widths_111 <- norm_11111_combined[, median(larval_width), by = sample_name]
+median_widths_132 <- norm_13211_combined[, median(larval_width), by = sample_name]
+median_widths_7 <- norm_711_combined[, median(larval_width), by = sample_name]
+median_widths_25 <- norm_2511_combined[, median(larval_width), by = sample_name]
+median_widths_137 <- norm_13713_combined[, median(larval_width), by = sample_name]
+median_widths_72 <- norm_7211_combined[, median(larval_width), by = sample_name]
 
-max_widths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
-max_widths$genotype <- factor(max_widths$genotype, levels = c("norm_132", "norm_111", "norm_7",
-                                                                "norm_25", "norm_137", "norm_72"))
+colnames(median_widths_111)[2] <- "median_width"
+colnames(median_widths_132)[2] <- "median_width"
+colnames(median_widths_7)[2] <- "median_width"
+colnames(median_widths_25)[2] <- "median_width"
+colnames(median_widths_137)[2] <- "median_width"
+colnames(median_widths_72)[2] <- "median_width"
 
-min_widths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
-min_widths$genotype <- factor(min_widths$genotype, levels = c("norm_132", "norm_111", "norm_7",
-                                                                "norm_25", "norm_137", "norm_72"))
+median_widths <- rbind(median_widths_111, median_widths_132, median_widths_7,
+                      median_widths_25, median_widths_137, median_widths_72)
 
-mean_widths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
-mean_widths$genotype <- factor(mean_widths$genotype, levels = c("norm_132", "norm_111", "norm_7",
+median_widths[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
+median_widths$genotype <- factor(median_widths$genotype, levels = c("norm_132", "norm_111", "norm_7",
                                                                   "norm_25", "norm_137", "norm_72"))
 
-max_widths$Genotype <- factor(ifelse(max_widths$genotype == "norm_132", "loxP",
-                                      ifelse(max_widths$genotype == "norm_111", "loxP",
-                                             ifelse(max_widths$genotype == "norm_7", "loxP",
-                                                    ifelse(max_widths$genotype == "norm_25", "GEPD",
-                                                           ifelse(max_widths$genotype == "norm_137", "GEPD",
-                                                                  "GEPD"))))), levels = c("loxP", "GEPD"))
-min_widths$Genotype <- factor(ifelse(min_widths$genotype == "norm_132", "loxP",
-                                      ifelse(min_widths$genotype == "norm_111", "loxP",
-                                             ifelse(min_widths$genotype == "norm_7", "loxP",
-                                                    ifelse(min_widths$genotype == "norm_25", "GEPD",
-                                                           ifelse(min_widths$genotype == "norm_137", "GEPD",
-                                                                  "GEPD"))))), levels = c("loxP", "GEPD"))
-mean_widths$Genotype <- factor(ifelse(mean_widths$genotype == "norm_132", "loxP",
-                                       ifelse(mean_widths$genotype == "norm_111", "loxP",
-                                              ifelse(mean_widths$genotype == "norm_7", "loxP",
-                                                     ifelse(mean_widths$genotype == "norm_25", "GEPD",
-                                                            ifelse(mean_widths$genotype == "norm_137", "GEPD",
+median_widths$Genotype <- factor(ifelse(median_widths$genotype == "norm_132", "loxP",
+                                       ifelse(median_widths$genotype == "norm_111", "loxP",
+                                              ifelse(median_widths$genotype == "norm_7", "loxP",
+                                                     ifelse(median_widths$genotype == "norm_25", "GEPD",
+                                                            ifelse(median_widths$genotype == "norm_137", "GEPD",
                                                                    "GEPD"))))), levels = c("loxP", "GEPD"))
-
-
-gg_max_widths <- ggplot(max_widths, aes(x = genotype, y = max_width)) + 
+# median width of pooled data
+gg_median_widths_pooled <- ggplot(median_widths, aes(x = Genotype, y = median_width)) +
   geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
   geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
   scale_shape_discrete(solid = FALSE) +
   scale_x_discrete(name = NULL) +
-  scale_y_continuous(name = "Max. width / mm") +
+  scale_y_continuous(name = "Median Width / mm", limits = c(0, 2)) +
   scale_fill_manual(values = c("grey64", "firebrick")) +
   theme_bw() +
-  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
-        text = element_text(size = 50), 
-        legend.text = element_text(size = 30),
-        legend.justification = c(1, 1), legend.position = c(1, 1),
-        legend.box.margin = margin(c(10, 10, 10, 10)),
-        legend.title = element_blank(),
-        legend.key.size = unit(2.0, 'cm'))
-gg_max_widths
-
-gg_min_widths <- ggplot(min_widths, aes(x = genotype, y = min_width)) + 
-  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
-  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
-  scale_shape_discrete(solid = FALSE) +
-  scale_x_discrete(name = NULL) +
-  scale_y_continuous(name = "Max. width / mm") +
-  scale_fill_manual(values = c("grey64", "firebrick")) +
-  theme_bw() +
-  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
-        text = element_text(size = 50), 
-        legend.text = element_text(size = 30),
-        legend.justification = c(1, 1), legend.position = c(1, 1),
-        legend.box.margin = margin(c(10, 10, 10, 10)),
-        legend.title = element_blank(),
-        legend.key.size = unit(2.0, 'cm'))
-gg_min_widths
-
-gg_mean_widths <- ggplot(mean_widths, aes(x = genotype, y = mean_width)) + 
-  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
-  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
-  scale_shape_discrete(solid = FALSE) +
-  scale_x_discrete(name = NULL) +
-  scale_y_continuous(name = "Mean Width / mm", limits = c(0.5, 2)) +
-  scale_fill_manual(values = c("grey64", "firebrick")) +
-  theme_bw() +
-  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
-        text = element_text(size = 50), 
-        legend.text = element_text(size = 30),
-        legend.justification = c(1, 1), legend.position = c(1, 1),
-        legend.box.margin = margin(c(10, 10, 10, 10)),
-        legend.title = element_blank(),
-        legend.key.size = unit(2.0, 'cm'))
-gg_mean_widths
+  theme(axis.title.y = element_text(size = 40, margin = margin(t = 0, r = 30, b = 0, l = 0)),
+        text = element_text(size = 50),
+        legend.position = "none")
+gg_median_widths_pooled
 
 # Stats
-kruskal.test(mean_widths$mean_width ~ mean_widths$genotype, data = mean_widths)
-dunnTest(mean_widths$mean_width ~ mean_widths$genotype, data = mean_widths)
+wilcox.test(median_width ~ Genotype, data = median_widths)
 
-max_widths <- mean_widths[, max(mean_width, na.rm = TRUE), by = Genotype]
-max_loxp <- max_widths[1,2]
-max_loxp <- as.numeric(max_loxp)
-max_loxp <- max_loxp + 0.1
+# Error bars
+max_width <- max(median_widths$median_width) + 0.2
+sign_max_width <- data.frame(Genotype = c(1, 2), median_width = rep(max_width, 2))
+gg_median_widths_pooled2 <- gg_median_widths_pooled + geom_line(data = sign_max_width, aes(x = Genotype, y = median_width, group = 1)) +
+  annotate("text", x = 1.5, y = max_width + 0.2, label = "p = 0.07", size = 10)
 
-max_gepd <- max_widths[2,2]
-max_gepd <- as.numeric(max_gepd)
-max_gepd <- max_gepd + 0.1
+gg_median_widths_pooled2
 
-# Draw error bars for gg_mean_widths
-sign_loxp <- data.frame(genotype = c("norm_111", "norm_132", "norm_7"), mean_width = rep(max_loxp, 3))
-sign_gepd <- data.frame(genotype = c("norm_25", "norm_137", "norm_72"), mean_width = rep(max_gepd, 3))
+################################################################################
+################################## Analyse AR ##################################
+################################################################################
 
-gg_mean_widths2 <- gg_mean_widths + geom_line(data = sign_loxp, aes(x = genotype, y = mean_width, group = 1))
+# Check whether AR is normally distributed
+ggplot(norm_11111_combined, aes(x = AR, fill = sample_name)) +
+  geom_histogram()
 
-gg_mean_widths3 <- gg_mean_widths2 + geom_line(data = sign_gepd, aes(x = genotype, y = mean_width, group = 1))
+ggplot(norm_13211_combined, aes(x = AR, fill = sample_name)) +
+  geom_histogram()
 
-# Draw error bar for betwen-group stats
-sign_combined <- data.frame(genotype = c("norm_111", "norm_137"), mean_width = rep(max_gepd + 0.2, 2))
-gg_mean_widths4 <- gg_mean_widths3 + geom_line(data = sign_combined, aes(x = genotype, y = mean_width, group = 1)) +
-  annotate("text", x = 3.5, y = max_gepd + 0.275, label = "ns", size = 10) +
-  annotate("text", x = 2, y = max_loxp + 0.075, label = "ns", size = 10) +
-  annotate("text", x = 5, y = max_gepd + 0.075, label = "ns", size = 10)
-gg_mean_widths4
+ggplot(norm_711_combined, aes(x = AR, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_2511_combined, aes(x = AR, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_13713_combined, aes(x = AR, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_7211_combined, aes(x = AR, fill = sample_name)) +
+  geom_histogram()
+
+
+median_AR_111 <- norm_11111_combined[, median(AR), by = sample_name]
+median_AR_132 <- norm_13211_combined[, median(AR), by = sample_name]
+median_AR_7 <- norm_711_combined[, median(AR), by = sample_name]
+median_AR_25 <- norm_2511_combined[, median(AR), by = sample_name]
+median_AR_137 <- norm_13713_combined[, median(AR), by = sample_name]
+median_AR_72 <- norm_7211_combined[, median(AR), by = sample_name]
+
+colnames(median_AR_111)[2] <- "median_AR"
+colnames(median_AR_132)[2] <- "median_AR"
+colnames(median_AR_7)[2] <- "median_AR"
+colnames(median_AR_25)[2] <- "median_AR"
+colnames(median_AR_137)[2] <- "median_AR"
+colnames(median_AR_72)[2] <- "median_AR"
+
+median_AR <- rbind(median_AR_111, median_AR_132, median_AR_7,
+                     median_AR_25, median_AR_137, median_AR_72)
+
+median_AR[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
+median_AR$genotype <- factor(median_AR$genotype, levels = c("norm_132", "norm_111", "norm_7",
+                                                                "norm_25", "norm_137", "norm_72"))
+
+median_AR$Genotype <- factor(ifelse(median_AR$genotype == "norm_132", "loxP",
+                                      ifelse(median_AR$genotype == "norm_111", "loxP",
+                                             ifelse(median_AR$genotype == "norm_7", "loxP",
+                                                    ifelse(median_AR$genotype == "norm_25", "GEPD",
+                                                           ifelse(median_AR$genotype == "norm_137", "GEPD",
+                                                                  "GEPD"))))), levels = c("loxP", "GEPD"))
+# median width of pooled data
+gg_median_AR_pooled <- ggplot(median_AR, aes(x = Genotype, y = median_AR)) +
+  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
+  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
+  scale_shape_discrete(solid = FALSE) +
+  scale_x_discrete(name = NULL) +
+  scale_y_continuous(name = "Axial Ratio") +
+  scale_fill_manual(values = c("grey64", "firebrick")) +
+  theme_bw() +
+  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)),
+        text = element_text(size = 50),
+        legend.position = "none")
+gg_median_AR_pooled
+
+# Stats
+wilcox.test(median_AR ~ Genotype, data = median_AR)
+
+# Error bars
+max_AR <- max(median_AR$median_AR) + 0.1
+sign_max_AR <- data.frame(Genotype = c(1, 2), median_AR = rep(max_AR, 2))
+gg_median_AR_pooled2 <- gg_median_AR_pooled + geom_line(data = sign_max_AR, aes(x = Genotype, y = median_AR, group = 1)) +
+  annotate("text", x = 1.5, y = max_AR + 0.1, label = "**", size = 10)
+
+gg_median_AR_pooled2
+
+################################################################################
+############################# Analyse inverse AR ###############################
+################################################################################
+
+# Check whether AR is normally distributed
+ggplot(norm_11111_combined, aes(x = larval_stop, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_13211_combined, aes(x = larval_stop, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_711_combined, aes(x = larval_stop, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_2511_combined, aes(x = larval_stop, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_13713_combined, aes(x = larval_stop, fill = sample_name)) +
+  geom_histogram()
+
+ggplot(norm_7211_combined, aes(x = larval_stop, fill = sample_name)) +
+  geom_histogram()
+
+
+median_larval_stop_111 <- norm_11111_combined[, median(larval_stop), by = sample_name]
+median_larval_stop_132 <- norm_13211_combined[, median(larval_stop), by = sample_name]
+median_larval_stop_7 <- norm_711_combined[, median(larval_stop), by = sample_name]
+median_larval_stop_25 <- norm_2511_combined[, median(larval_stop), by = sample_name]
+median_larval_stop_137 <- norm_13713_combined[, median(larval_stop), by = sample_name]
+median_larval_stop_72 <- norm_7211_combined[, median(larval_stop), by = sample_name]
+
+colnames(median_larval_stop_111)[2] <- "median_larval_stop"
+colnames(median_larval_stop_132)[2] <- "median_larval_stop"
+colnames(median_larval_stop_7)[2] <- "median_larval_stop"
+colnames(median_larval_stop_25)[2] <- "median_larval_stop"
+colnames(median_larval_stop_137)[2] <- "median_larval_stop"
+colnames(median_larval_stop_72)[2] <- "median_larval_stop"
+
+median_larval_stop <- rbind(median_larval_stop_111, median_larval_stop_132, median_larval_stop_7,
+                   median_larval_stop_25, median_larval_stop_137, median_larval_stop_72)
+
+median_larval_stop[, genotype := gsub("[0-9]{1,2}_[0-9]{1,2}", "", sample_name)]
+median_larval_stop$genotype <- factor(median_larval_stop$genotype, levels = c("norm_132", "norm_111", "norm_7",
+                                                            "norm_25", "norm_137", "norm_72"))
+
+median_larval_stop$Genotype <- factor(ifelse(median_larval_stop$genotype == "norm_132", "loxP",
+                                    ifelse(median_larval_stop$genotype == "norm_111", "loxP",
+                                           ifelse(median_larval_stop$genotype == "norm_7", "loxP",
+                                                  ifelse(median_larval_stop$genotype == "norm_25", "GEPD",
+                                                         ifelse(median_larval_stop$genotype == "norm_137", "GEPD",
+                                                                "GEPD"))))), levels = c("loxP", "GEPD"))
+# median width of pooled data
+gg_median_larval_stop_pooled <- ggplot(median_larval_stop, aes(x = Genotype, y = median_larval_stop)) +
+  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
+  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
+  scale_shape_discrete(solid = FALSE) +
+  scale_x_discrete(name = NULL) +
+  scale_y_continuous(name = "Width / Length", limits = c(0, 0.6)) +
+  scale_fill_manual(values = c("grey64", "firebrick")) +
+  theme_bw() +
+  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)),
+        text = element_text(size = 50),
+        legend.position = "none")
+gg_median_larval_stop_pooled
+
+# Stats
+t.test(median_larval_stop ~ Genotype, data = median_larval_stop)
+
+# Error blarval_stops
+max_larval_stop <- max(median_larval_stop$median_larval_stop) + 0.01
+sign_max_larval_stop <- data.frame(Genotype = c(1, 2), median_larval_stop = rep(max_larval_stop, 2))
+gg_median_larval_stop_pooled2 <- gg_median_larval_stop_pooled + geom_line(data = sign_max_larval_stop, aes(x = Genotype, y = median_larval_stop, group = 1)) +
+  annotate("text", x = 1.5, y = max_larval_stop + 0.01, label = "**", size = 10)
+
+gg_median_larval_stop_pooled2
 
 
 ###############################################################################
@@ -986,7 +973,7 @@ draw_dual_plot <- function(filename, save = FALSE) {
 }
 
 # Plot individual traces
-stretch <- draw_dual_plot("../../72.1.1/cropped/tracked_VID_20180515_154852.mp4_nosound.mp4_cropped.mp4.csv")
+stretch <- draw_dual_plot("../../72.1.1/cropped/tracked_VID_20180521_191900.mp4_nosound.mp4_cropped.mp4.csv")
 stretch[2]
 
 # Define a turn by passing the threshold of width/length = 0.4 
@@ -1056,19 +1043,19 @@ max_gepd <- as.numeric(max_gepd)
 max_gepd <- max_gepd + 0.5
 
 # Draw error bars for gg
-sign_loxp <- data.frame(genotype = c("13211", "11111", "711"), threshold_crosses = rep(max_loxp, 3))
-sign_gepd <- data.frame(genotype = c("2511", "13713", "7211"), threshold_crosses = rep(max_gepd, 3))
+sign_loxp <- data.frame(genotype = c("13211", "11111", "711"), threshold_crosses = rep(max_loxp + 1, 3))
+sign_gepd <- data.frame(genotype = c("2511", "13713", "7211"), threshold_crosses = rep(max_gepd + 1, 3))
 
 gg2 <- gg + geom_line(data = sign_loxp, aes(x = genotype, y = threshold_crosses, group = 1)) +
-  annotate("text", x = "11111", y = max_loxp + 1, label = "ns", size = 10)
+  annotate("text", x = "11111", y = max_loxp + 2, label = "ns", size = 10)
 
 gg3 <- gg2 + geom_line(data = sign_gepd, aes(x = genotype, y = threshold_crosses, group = 1)) +
-  annotate("text", x = "13713", y = max_gepd + 1, label = "ns", size = 10)
+  annotate("text", x = "13713", y = max_gepd + 2, label = "ns", size = 10)
 
 # Draw error bar for betwen-group stats
-sign_combined <- data.frame(genotype = c("11111", "13713"), threshold_crosses = rep(max_loxp + 2, 2))
+sign_combined <- data.frame(genotype = c("11111", "13713"), threshold_crosses = rep(max_loxp + 3, 2))
 gg4 <- gg3 + geom_line(data = sign_combined, aes(x = genotype, y = threshold_crosses, group = 1)) +
-  annotate("text", x = 3.5, y = max_loxp + 2.5, label = "        ****", size = 10)
+  annotate("text", x = 3.5, y = max_loxp + 3.5, label = "        ****", size = 10)
 gg4
 
 # Plot example turns for figure
@@ -1090,8 +1077,39 @@ ggplot(norm_13211_combined[sample_name == "norm_13211_22", ], aes(x = time, y = 
         text = element_text(size = 50)) +
   geom_hline(aes(yintercept = 0.4), linetype = 2)
 
-# Plot total turns with pooled genotypes
 
+# Plot total turns with pooled genotypes
+gg <- ggplot(turns, aes(x = Genotype, y = threshold_crosses)) + 
+  geom_boxplot(aes(fill = Genotype), outlier.shape = NA, na.rm = TRUE) +
+  geom_jitter(position = position_jitter(0.2), na.rm = TRUE, shape = 4, size = 6) +
+  scale_shape_discrete(solid = FALSE) +
+  scale_x_discrete(name = NULL) +
+  scale_y_continuous(name = "Turns / min") +
+  scale_fill_manual(values = c("grey64", "firebrick")) +
+  theme_bw() +
+  theme(axis.title.y = element_text(size = 50, margin = margin(t = 0, r = 30, b = 0, l = 0)), 
+        text = element_text(size = 50), 
+        legend.position = "none")
+gg
+
+# Stats
+# Stats on individual replicates
+wilcox.test(turns$threshold_crosses ~ turns$Genotype, data = turns)
+
+# Draw error bars
+setDT(turns)
+
+max_turns <- turns[, max(threshold_crosses), by = Genotype]
+max_loxp <- max_turns[1,2]
+max_loxp <- as.numeric(max_loxp)
+max_loxp <- max_loxp + 0.5
+
+# Draw error bars for gg
+sign_loxp <- data.frame(Genotype = c("loxP", "GEPD"), threshold_crosses = rep(max_loxp + 1, 2))
+
+gg2 <- gg + geom_line(data = sign_loxp, aes(x = Genotype, y = threshold_crosses, group = 1)) +
+  annotate("text", x = 1.5, y = max_loxp + 2, label = "****", size = 10)
+gg2
 
 ###############################################################################
 #################################  END  #######################################
